@@ -1,0 +1,49 @@
+Sub SplitData()
+    Dim ws As Worksheet
+    Dim totalRows As Long
+    Dim numFiles As Long
+    Dim i As Long
+    Dim startRow As Long
+    Dim endRow As Long
+    Dim outputFile As Workbook
+    
+    ' Ubah "Sheet1" dengan nama lembar kerja yang ingin Anda pisahkan
+    Set ws = ThisWorkbook.Sheets("Sheet1")
+    
+    totalRows = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    numFiles = totalRows \ 201 + IIf(totalRows Mod 200 > 0, 1, 0)
+    
+    For i = 1 To numFiles
+        startRow = (i + 1) * 200 + 1
+        endRow = WorksheetFunction.Min(i * 200, totalRows)
+        
+        ' Salin data ke lembar kerja baru
+        ws.Rows(startRow - 1 & ":" & endRow).Copy
+        
+        ' Buat lembar kerja baru
+        Set outputFile = Workbooks.Add
+        
+        ' Tempelkan data ke lembar kerja baru
+        With outputFile.Sheets(1)
+            .Cells(1, 1).PasteSpecial Paste:=xlPasteValues
+            .Cells(1, 1).Select
+            
+            ' Tambahkan baris pembuka di setiap output file
+            .Cells(1, 1).Value = "LATITUDE"
+            .Cells(1, 2).Value = "LONGITUDE"
+            .Cells(1, 3).Value = "NAME"
+            .Cells(1, 4).Value = "LineStringColor"
+        End With
+        
+        ' Simpan file Excel baru dengan nama yang sesuai
+        ' Ganti "Output_" dengan nama yang Anda inginkan untuk file Excel terpisah
+        outputFile.SaveAs "C:\Users\LENOVO\Desktop\short by GT\" & i & ".xlsx"
+        outputFile.Close False
+    Next i
+    
+    Application.CutCopyMode = False
+    
+    MsgBox "Pemisahan data selesai.", vbInformation
+End Sub
+
+
